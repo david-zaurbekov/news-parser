@@ -1,0 +1,2 @@
+2019-02-03 16:33:43,555 ERROR - WebApi.Controllers.NewsController - SSHWXAS. Type: WebApi.Controllers.NewsController. Method: GetTopWords. Line: 73
+2019-02-03 16:34:03,515 ERROR - WebApi.Controllers.NewsController - SSHWXAS. Type: WebApi.Controllers.NewsController. Method: GetTopWords. Line: 73

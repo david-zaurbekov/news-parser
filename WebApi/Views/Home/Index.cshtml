@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "Лента новостей";
+}
+
+@section styles {
+    <style type="text/css">
+        .input-prepend {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .input-mini .add-on {
+            height: 14px;
+            min-width: 15px;
+            padding: 4px;
+            padding-top: 2px;
+            font-size: 10px;
+            line-height: 10px;
+        }
+    </style>
+}
+
+<h1>Лента новостей</h1>
+<div class="row">
+    <div class="col-md-12">
+        <h2>api/posts</h2>
+        <div>
+            Дата от <input type="date" id="date-from" /> по <input type="date" id="date-to" />
+            <button id="load-posts" disabled class="btn btn-primary">Загрузить</button>
+        </div>
+        <div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Заголовок</th>
+                        <th>Дата</th>
+                        <th>Текст</th>
+                    </tr>
+                </thead>
+                <tbody id="posts-content"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <h2>api/topten</h2>
+        <button id="load-topten" disabled class="btn btn-primary">Загрузить</button>
+        <div id="topten-content"></div>
+    </div>
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-12">
+        <h2>api/search</h2>
+        Поиск <input type="text" id="search-text" />
+        <button id="load-search" disabled class="btn btn-primary">Загрузить</button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Дата</th>
+                    <th>Текст</th>
+                </tr>
+            </thead>
+            <tbody id="search-content"></tbody>
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            var token = '';
+            $.ajax({
+                type: 'POST',
+                url: '/Token',
+                data: { grant_type: 'password', username: 'qwerty' }
+            }).done(function (response) {
+                token = response.access_token;
+                $('button').prop('disabled', false);
+            }).fail(onFail);
+
+            $('#load-posts').click(function (e) {
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '/api/posts',
+                    data: { from: $('#date-from').val(), to: $('#date-to').val() },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    },
+                }).done(function (result) {
+                    var html = '';
+                    result.forEach(function (item) {
+                        html += `<tr><td>${item.Title}</td><td>${item.PublishDate}</td><td>${item.Content}</td></tr>`;
+                    });
+                    $('#posts-content').html(html);
+                });
+            });
+
+            $('#load-topten').click(function (e) {
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '/api/topten',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    },
+                }).done(function (result) {
+                    var html = '<ul>';
+                    result.forEach(function (item) {
+                        html += '<li>' + item + '</li>';
+                    });
+                    html += '</ul>';
+                    $('#topten-content').html(html);
+                });
+            });
+
+            $('#load-search').click(function (e) {
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    url: '/api/search',
+                    data: { text: $('#search-text').val() },
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+                    },
+                }).done(function (result) {
+                    var html = '';
+                    result.forEach(function (item) {
+                        html += `<tr><td>${item.Title}</td><td>${item.PublishDate}</td><td>${item.Content}</td></tr>`;
+                    });
+                    $('#search-content').html(html);
+                });
+            });
+        });
+
+        function onFail(response) {
+            console.error(response);
+        }
+    </script>
+}
